@@ -2,6 +2,7 @@ import re
 from _functools import reduce
 
 from tools.Helper import UsefulHelper
+import numpy
 
 '''
 解析gfxinfo文件，返回一个绘制时长的list
@@ -28,8 +29,9 @@ def parseGFX(result=''):
     #对数据进行解析，返回dict = {'orginal':[xxx],'fps':[xxx],'outcount':5}
     dict = {}
     dict['original'] = count_time;
-    dict['fps'] = list(map(lambda x:str(round(1000/x,2)),count_time));
-    dict['outcount'] = str(list(filter(lambda x:x>16.66,count_time)).__len__());
+    dict['fps'] = list(map(lambda x:round(1000/x,2),count_time));
+    dict['outcount'] = list(filter(lambda x:x>16.66,count_time)).__len__();
+    dict['variance'] = numpy.var(dict['fps']);
     return dict;
 
 def parsePIDCpuTime(result=''):

@@ -8,7 +8,8 @@ from tools.Helper import UsefulHelper
 
 with open(os.path.join(sys.path[0],'Config.py'),'r+',encoding = 'utf-8') as f:
     result = f.read()
-    result02 = re.sub("packageName = '.*' ","packageName='"+UsefulHelper().getCurrentPackageName()+"'",result);
+    cur = UsefulHelper().getCurrentPackageName();
+    result02 = re.sub("packageName='.*'","packageName='"+cur+"'",result);
     print(result02)
 
 with open(os.path.join(sys.path[0],'Config.py'),'w+',encoding = 'utf-8') as f:

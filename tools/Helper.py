@@ -4,8 +4,10 @@ import csv
 import os
 import time
 import sys
+from functools import reduce
 
 import Config
+import numpy
 
 
 class ShellHelpr():
@@ -58,6 +60,7 @@ class UsefulHelper():
 
 if __name__ == '__main__':
     #print(UsefulHelper().getScreenSize());
-    UsefulHelper().simpleWriteCSV("C:/Users/Administrator/Desktop",'justtest.csv',['1001.1','102.5']);
-    print(UsefulHelper().getCurrentActivity());
-    print(UsefulHelper().getPropValue('heapgrowthlimit'))
+    #UsefulHelper().simpleWriteCSV("C:/Users/Administrator/Desktop",'justtest.csv',['1001.1','102.5']);
+    #print(UsefulHelper().getCurrentActivity());
+    #print(UsefulHelper().getPropValue('heapgrowthlimit'))
+    print(UsefulHelper().getVariance(1.2,2.523232,3));
