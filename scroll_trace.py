@@ -2,7 +2,7 @@ import subprocess,sys,threading
 
 import Config
 from Config import *;
-from tools.FilePaser import parseGFX
+from tools.FilePaser import parseGFX02,parseGFX
 from tools.Helper import UsefulHelper, ShellHelpr
 import numpy
 

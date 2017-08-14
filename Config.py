@@ -1,4 +1,4 @@
-packageName='com.facebook.katana'   #可以自己写入包名，也可以保持应用在前台运行 initPackageName自动填入!
+packageName='com.arashivision.insta360air'   #可以自己写入包名，也可以保持应用在前台运行 initPackageName自动填入!
 
 scrollPoint = (800,300,200,300) #可以自定义滚动坐标，传入list[startX,startY,endX,endY]，为空则表示读取机型分辨率后计算
 
