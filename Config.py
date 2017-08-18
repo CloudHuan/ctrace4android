@@ -11,3 +11,5 @@ largeHeap = True    #计算pss占用分配的比例，androidmanifest如果打�
 maxBattery = 3000    #手机最大电量，会根据这个值计算出当前界面持续使用能用多久
 
 scroll_time = 10    #自动屏幕滑动最大次数
+
+degbugMode = False   #为true时会打印调试信息

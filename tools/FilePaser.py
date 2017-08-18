@@ -2,11 +2,15 @@ import re
 from _functools import reduce
 
 import Config
+from tools import log
 from tools.Helper import UsefulHelper
 import numpy
 
 '''
-解析gfxinfo文件，返回一个绘制时长的list
+解析gfxinfo文件，通过dict返回,每次执行命令返回一个dict对象
+dict['jank_count']  #绘制时间大于16.666ms那么+1
+dict['fps']     #根据128帧的绘制时间计算帧数
+dict['varance']  #128帧的时间计算稳定性
 '''
 def parseGFX(result=''):
     if result == '' or 'No process found' in result:
@@ -22,43 +26,35 @@ def parseGFX(result=''):
         result = result.split('Execute')[-1].split('View hierarchy:')[0]
         data = result;
         data_lines = data.split('\n')[1:-2];
-    count_time = [];
+    log.debug('parse gfx ok');
+    frame_times = [];
+    dict = {};
+    jank_count = 0;
+    frame_count = data_lines.__len__();
+    frame_timeout = 0;
+    #数据提取
     for datas in data_lines:
         l = datas.split('\t')
-        sum = float(l[1])+float(l[2])+float(l[3])+float(l[4]);
-        sum = round(sum,2);
-        count_time.append(sum);
-        if count_time == []:
-            return -2;
-    #对数据进行解析，返回dict = {'orginal':[xxx],'fps':[xxx],'outcount':5}
-    dict = {}
-    dict['original'] = count_time;
-    dict['fps'] = list(map(lambda x:round(1000/x,2),count_time));
-    dict['outcount'] = list(filter(lambda x:x>16.66,count_time)).__len__();
-    dict['variance'] = numpy.var(dict['fps']);
-    return dict;
-
-def parseGFX02(result=''):
-    if result == '' or 'No process found' in result:
-        print('no data find!is your current pkg is'+Config.packageName);
+        frame_time = round(float(l[1])+float(l[2])+float(l[3])+float(l[4]),2);
+        frame_times.append(frame_time);
+        if frame_time > 16.67:
+            jank_count += 1;
+            log.debug("frame_time:"+str(frame_time))
+            if frame_time % 16.67 == 0:
+                frame_timeout += frame_time / 16.67 -1;
+            else:
+                frame_timeout += int(frame_time / 16.67);
+                log.debug("frame_timeout:" + str(frame_timeout))
+    try:
+        _fps = frame_count * 60 / (frame_count + frame_timeout);
+    except:
+        print('parse error!no frame data!do you keep move?');
         exit(-1)
-    result = result.split('Execute')[-1];
-    result = result.split('\n\n\n\n')[0];
-    data_lines = re.split('\n+',result)[1:-1];
-    count_time = [];
-    for datas in data_lines:
-        l = datas.split('\t')
-        sum = float(l[1]) + float(l[2]) + float(l[3]) + float(l[4]);
-        sum = round(sum, 2);
-        count_time.append(sum);
-        if count_time == []:
-            return -2;
-    # 对数据进行解析，返回dict = {'orginal':[xxx],'fps':[xxx],'outcount':5}
-    dict = {}
-    dict['original'] = count_time;
-    dict['fps'] = list(map(lambda x: round(1000 / x, 2), count_time));
-    dict['outcount'] = list(filter(lambda x: x > 16.66, count_time)).__len__();
-    dict['variance'] = numpy.var(dict['fps']);
+    #数据计算
+    dict['jank_count'] = jank_count;
+    dict['variance'] = round(numpy.var(frame_times),2);
+    dict['fps'] = round(_fps,2);
+    log.debug('jank:'+str(jank_count)+'   varance:'+str(dict['variance']));
     return dict;
 
 def parsePIDCpuTime(result=''):
@@ -80,6 +76,6 @@ def parsePSS(result=''):
     return resp;
 
 if __name__ == '__main__':
-    with open('C:\\Users\\Administrator\\Desktop\\gfxinfomix.txt','r+') as f:
+    with open('C:\\Users\\Administrator\\Desktop\\gfxinfo.txt','r+') as f:
         result = f.read();
-    parseGFX(result);
+    print(parseGFX(result));

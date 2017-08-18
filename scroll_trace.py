@@ -2,12 +2,14 @@ import subprocess,sys,threading
 
 import Config
 from Config import *;
-from tools.FilePaser import parseGFX02,parseGFX
+from tools.FilePaser import parseGFX
 from tools.Helper import UsefulHelper, ShellHelpr
 import numpy
 
 '''
-低于60fps个数   方差    
+dict['jank_count']  #绘制时间大于16.666ms那么+1
+dict['fps']     #根据128帧的绘制时间计算帧数
+dict['variance']  #128帧的时间计算稳定性
 '''
 class ScrollThread(threading.Thread):
 
@@ -18,7 +20,7 @@ class ScrollThread(threading.Thread):
         self.flag = True;
         self.screen = UsefulHelper().getScreenSize();
         self.name = 'fps_'+UsefulHelper().getSaveCSVName();
-        UsefulHelper().simpleWriteCSV(name=self.name, list=[Config.packageName]);
+        UsefulHelper().simpleWriteCSV(name=self.name, list=[Config.packageName,UsefulHelper().getPropValue('model')]);
 
     def run(self):
         if Config.scroll_time < 0:
@@ -39,7 +41,7 @@ class ScrollThread(threading.Thread):
 
     def scroll_position(self,position):
         if position == '1':
-            self.way = '%d %d %d %d' % (self.screen[0]/2,self.screen[1]*3/4,self.screen[0]/2,self.screen[1]/4);
+            self.way = '%d %d %d %d' % (self.screen[0]/2,self.screen[1]*3/5,self.screen[0]/2,self.screen[1]/5);
         if position == '2':
             self.way = '%d %d %d %d' % (self.screen[0]/2,self.screen[1]/4,self.screen[0]/2,self.screen[1]*3/4);
         if position == '3':
@@ -51,22 +53,21 @@ class ScrollThread(threading.Thread):
     #取到测试数据的处理函数
     def dataAfter(self,data_resp):
 
-        self.all_fps = self.all_fps + data_resp['fps'];
-
-        fps_data = list(map(lambda x:str(x),data_resp['fps']));
-        variance_data = str(data_resp['variance']);
-        nosync_data = str(data_resp['outcount']);
-        UsefulHelper().simpleWriteCSV(name=self.name,list=fps_data);
-        UsefulHelper().simpleWriteCSV(name=self.name, list=[nosync_data,variance_data]);
-
-        print(str(data_resp['outcount'])+'|||'+str(variance_data));
+        fps = str(data_resp['fps']);
+        variance = str(data_resp['variance']);
+        jank = str(data_resp['jank_count']);
+        UsefulHelper().simpleWriteCSV(name=self.name, list=[fps,jank,variance]);
+        self.all_fps.append(data_resp['fps']);
+        print("fps:"+fps+"|jank:"+jank+'|variance:'+variance);
 
     '''最后一次运行,作为总的统计'''
     def last_run(self):
-        variance = numpy.var(self.all_fps);
+        variance_fps = numpy.var(self.all_fps);
         argv = numpy.mean(self.all_fps);
-        UsefulHelper().simpleWriteCSV(name=self.name, list=['平均值:',argv]);
-        UsefulHelper().simpleWriteCSV(name=self.name, list=['方差',variance]);
+        UsefulHelper().simpleWriteCSV(name=self.name, list=['fps平均值:',argv]);
+        UsefulHelper().simpleWriteCSV(name=self.name, list=['fps方差',variance_fps]);
+        print('-------------summary------------');
+        print("fps avg:" + str(argv) + "|fps variance:" + str(variance_fps));
 
 if __name__ == '__main__':
     s = ScrollThread();

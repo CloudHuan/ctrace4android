@@ -1,7 +1,10 @@
+import logging
+import signal
 import subprocess
 import re
 import csv
 import os
+import tempfile
 import time
 import sys
 from functools import reduce
@@ -9,6 +12,11 @@ from functools import reduce
 import Config
 import numpy
 
+class ADB():
+
+    def RunShellCommand(self, command, timeout_time=20, log_result=False):
+        result = ShellHelpr().exec('adb shell '+command);
+        return (result,'None');
 
 class ShellHelpr():
 
@@ -63,4 +71,6 @@ if __name__ == '__main__':
     #UsefulHelper().simpleWriteCSV("C:/Users/Administrator/Desktop",'justtest.csv',['1001.1','102.5']);
     #print(UsefulHelper().getCurrentActivity());
     #print(UsefulHelper().getPropValue('heapgrowthlimit'))
-    print(UsefulHelper().getVariance(1.2,2.523232,3));
+    #print(UsefulHelper().getVariance(1.2,2.523232,3));
+    result = ADB().RunShellCommand('ls /sdcard/');
+    print(result)
