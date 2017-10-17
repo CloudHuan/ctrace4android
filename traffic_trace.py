@@ -13,7 +13,9 @@ def getTraffic():
     count_tx = 0  # 发送流量
     for items in result:
         itemss = items.split()
-        if itemss[3] == userID and itemss[1] != 'lo':    #过滤第4列uid为选择的uid，避免统计其他的
+        if itemss.__len__() < 8:
+            continue;
+        if itemss[3] == userID and itemss[1] != 'lo':  # 过滤第4列uid为选择的uid，避免统计其他的
             count_rx = count_rx + int(itemss[5]);
             count_tx = count_tx + int(itemss[7]);
     #print("rx:"+str(count_rx)+"\ntx"+str(count_tx)+"\nsum:"+str(count_rx+count_tx));
